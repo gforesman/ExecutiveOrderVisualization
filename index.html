@@ -59,7 +59,6 @@
         grouped[president].y.push(president);
         grouped[president].text.push(`(${pointCounts[key]} EO${pointCounts[key] > 1 ? "s" : ""}) ${d.executive_order_number ? "EO " + d.executive_order_number + ": " : ""}${title}`);
         grouped[president].customdata.push(url);
-        grouped[president].size.push(pointCounts[key] * 5); // scale factor
       });
 
       const traces = Object.keys(grouped).map(president => ({
@@ -70,12 +69,7 @@
         y: grouped[president].y,
         text: grouped[president].text,
         customdata: grouped[president].customdata,
-        marker: {
-          size: grouped[president].size,
-          sizemode: 'diameter',
-          sizeref: 2,
-          sizemin: 8
-        }
+        marker: { size: 50 }
       }));
 
       // EO count annotations
