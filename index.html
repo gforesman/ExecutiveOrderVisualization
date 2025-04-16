@@ -39,7 +39,6 @@
 
     d3.csv("./executive_orders.csv").then(function(data) {
       const grouped = {};
-      const pointCounts = {}; // NEW: count of (president, date)
 
       data.forEach(d => {
         const parseDate = d3.timeParse("%m/%d/%Y");
@@ -57,7 +56,7 @@
         if (!grouped[president]) grouped[president] = { x: [], y: [], text: [], customdata: [], size: [] };
         grouped[president].x.push(date);
         grouped[president].y.push(president);
-        grouped[president].text.push(`(${pointCounts[key]} EO${pointCounts[key] > 1 ? "s" : ""}) ${d.executive_order_number ? "EO " + d.executive_order_number + ": " : ""}${title}`);
+        grouped[president].text.push(`${d.executive_order_number ? "EO " + d.executive_order_number + ": " : ""}${title}`);
         grouped[president].customdata.push(url);
       });
 
@@ -99,9 +98,7 @@
         xaxis: { title: 'Signing Date', type: 'date', autorange: true },
         yaxis: {
           title: 'President',
-          automargin: true,
-          categoryorder: 'array',
-          categoryarray: Object.keys(grouped).reverse() // newest at bottom
+          automargin: true
         },
         annotations: annotations
       };
