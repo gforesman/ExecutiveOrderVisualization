@@ -50,9 +50,6 @@
         const url = d.html_url || d.pdf_url || "";
         const president = getPresident(date);
 
-        const key = `${president}__${date}`;
-        pointCounts[key] = (pointCounts[key] || 0) + 1;
-
         if (!grouped[president]) grouped[president] = { x: [], y: [], text: [], customdata: [], size: [] };
         grouped[president].x.push(date);
         grouped[president].y.push(president);
