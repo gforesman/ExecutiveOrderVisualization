@@ -39,23 +39,42 @@
 
     d3.csv("./executive_orders.csv").then(function(data) {
       const grouped = {};
-
+      const parseDate = d3.timeParse("%m/%d/%Y");
+      const dateCounts = {};
+      
+      // First, count how many EOs are signed on each date
       data.forEach(d => {
-        const parseDate = d3.timeParse("%m/%d/%Y");
         const dateObj = parseDate(d.signing_date.trim());
         const date = dateObj ? dateObj.toISOString().split("T")[0] : null;
         if (!date) return;
-
+        dateCounts[date] = (dateCounts[date] || 0) + 1;
+      });
+      
+      // Then build the grouped data with scaled marker sizes
+      data.forEach(d => {
+        const dateObj = parseDate(d.signing_date.trim());
+        const date = dateObj ? dateObj.toISOString().split("T")[0] : null;
+        if (!date) return;
+      
         const title = d.title;
         const url = d.html_url || d.pdf_url || "";
         const president = getPresident(date);
-
-        if (!grouped[president]) grouped[president] = { x: [], y: [], text: [], customdata: [], size: [] };
+        const eoNumber = d.executive_order_number;
+      
+        const count = dateCounts[date];
+        const size = 6 + 4 * Math.sqrt(count); // Scale non-linearly
+      
+        if (!grouped[president]) {
+          grouped[president] = { x: [], y: [], text: [], customdata: [], markerSizes: [] };
+        }
+      
         grouped[president].x.push(date);
         grouped[president].y.push(president);
-        grouped[president].text.push(`${d.executive_order_number ? "EO " + d.executive_order_number + ": " : ""}${title}`);
+        grouped[president].text.push(`${eoNumber ? "EO " + eoNumber + ": " : ""}${title}`);
         grouped[president].customdata.push(url);
+        grouped[president].markerSizes.push(size);
       });
+
 
       const traces = Object.keys(grouped).map(president => ({
         type: 'scatter',
@@ -65,8 +84,14 @@
         y: grouped[president].y,
         text: grouped[president].text,
         customdata: grouped[president].customdata,
-        marker: { size: 50 }
+        marker: {
+          size: grouped[president].markerSizes,
+          sizemode: 'diameter',
+          sizeref: 1,
+          sizemin: 6
+        }
       }));
+
 
       // EO count annotations
       const annotations = Object.entries(grouped).map(([president, group]) => {
